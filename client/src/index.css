@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Civic Plan Design System - Nepal e-Governance Theme */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Nepal-inspired civic palette */
+    --background: 220 25% 97%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Deep civic blue - trust & authority */
+    --primary: 222 60% 24%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light blue-gray for secondary surfaces */
+    --secondary: 215 30% 94%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 215 25% 90%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Nepal crimson accent */
+    --accent: 348 83% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 88%;
+    --input: 215 25% 88%;
+    --ring: 222 60% 24%;
+
+    --radius: 0.75rem;
+
+    /* Custom civic tokens */
+    --civic-navy: 222 60% 24%;
+    --civic-navy-light: 222 45% 35%;
+    --civic-crimson: 348 83% 47%;
+    --civic-crimson-light: 348 83% 57%;
+    --civic-success: 160 84% 39%;
+    --civic-warning: 38 92% 50%;
+    --civic-info: 210 100% 50%;
+    
+    /* Progress states */
+    --progress-complete: 160 84% 39%;
+    --progress-ongoing: 210 100% 50%;
+    --progress-delayed: 38 92% 50%;
+    --progress-planned: 215 16% 47%;
+
+    /* Sidebar */
+    --sidebar-background: 222 60% 24%;
+    --sidebar-foreground: 215 30% 90%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 222 60% 24%;
+    --sidebar-accent: 222 45% 35%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 222 45% 30%;
+    --sidebar-ring: 348 83% 47%;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(222 60% 24% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(222 60% 24% / 0.08), 0 2px 4px -2px hsl(222 60% 24% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(222 60% 24% / 0.1), 0 4px 6px -4px hsl(222 60% 24% / 0.05);
+    --shadow-glow: 0 0 20px hsl(348 83% 47% / 0.2);
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 100% 70%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 222 35% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 35% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 348 83% 57%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 35% 22%;
+    --input: 222 35% 22%;
+    --ring: 210 100% 70%;
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 215 30% 85%;
+    --sidebar-primary: 210 100% 70%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 222 35% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 35% 18%;
+    --sidebar-ring: 348 83% 57%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer components {
+  .civic-card {
+    @apply bg-card rounded-xl border border-border p-6 transition-all duration-300;
+    box-shadow: var(--shadow-md);
+  }
+
+  .civic-card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .civic-stat-card {
+    @apply civic-card relative overflow-hidden;
+  }
+
+  .civic-stat-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-1 h-full;
+    background: hsl(var(--accent));
+  }
+
+  .progress-bar {
+    @apply h-2 bg-muted rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  .civic-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .civic-badge-complete {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .civic-badge-ongoing {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .civic-badge-delayed {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .civic-badge-planned {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  .civic-nav-item {
+    @apply flex items-center gap-3 px-6 py-3 rounded-md text-sidebar-foreground/80 transition-all duration-200;
+  }
+
+  .civic-nav-item:hover {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground;
+  }
+
+  .civic-nav-item.active, .civic-sidebar-item-active {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground font-semibold rounded-md;
+  }
+
+  .category-pill {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer;
+  }
+
+  .category-pill-inactive {
+    @apply bg-secondary text-secondary-foreground hover:bg-muted;
+  }
+
+  .category-pill-active {
+    @apply text-accent-foreground;
+    background: hsl(var(--accent));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .gradient-civic {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--civic-navy-light)) 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--civic-crimson-light)) 100%);
+  }
+}
