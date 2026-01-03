@@ -60,7 +60,7 @@ export const categories: { id: ProjectCategory; label: string; icon: string; col
   { id: 'electricity', label: 'Electricity', icon: 'Zap', color: 'text-amber-500' },
   { id: 'water', label: 'Water Supply', icon: 'Droplets', color: 'text-blue-500' },
   { id: 'roads', label: 'Roads', icon: 'Route', color: 'text-slate-600' },
-  { id: 'health', label: 'Health', icon: 'Heart', color: 'text-red-500' },
+  { id: 'health', label: 'Health', icon: 'Heart', color: 'text-tohers-500' },
   { id: 'education', label: 'Education', icon: 'GraduationCap', color: 'text-emerald-500' },
 ];
 
