@@ -44,6 +44,7 @@ const App = () => (
             <Route path="/admin/notifications" element={<AdminLayout><NotificationsPage /></AdminLayout>} />
             <Route path="/admin/inbox" element={<AdminLayout><InboxPage /></AdminLayout>} />
             <Route path="/admin/projects/:id" element={<AdminLayout><AdminProjectDetailPage /></AdminLayout>} />
+            <Route path="/admin/projects/:id/view" element={<AdminLayout><AdminProjectDetailPage /></AdminLayout>} />
 
             <Route path="/admin" element={<AdminLayout><AdminPanel /></AdminLayout>} />
             <Route path="/admin/*" element={<AdminLayout><AdminPanel /></AdminLayout>} />

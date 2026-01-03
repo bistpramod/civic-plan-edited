@@ -1,7 +1,9 @@
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Helmet } from 'react-helmet-async';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { projects, Project, formatCurrency, formatDate, getStatusColor, getProgressColor, categories } from '@/data/mockData';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { projects as mockProjects, Project, formatCurrency, formatDate, getStatusColor, getProgressColor, categories } from '@/data/mockData';
+import { getProject as getStoredProject, updateProject as persistProject, markCompleted as persistMarkCompleted, addUpdate as persistAddUpdate } from '@/lib/projectStore';
 import { MapPin, Calendar, User, Wallet, CheckCircle, Circle, AlertTriangle, TrendingUp, X, ArrowLeft } from 'lucide-react';
 import { Zap, Droplets, Route, Heart, GraduationCap } from 'lucide-react';
 
@@ -16,7 +18,23 @@ const iconMap: Record<string, React.ElementType> = {
 const ProjectDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const project = projects.find((p) => p.id === id) ?? null;
+  const [searchParams] = useSearchParams();
+  const isAdminView = searchParams.get('admin') === '1';
+
+  const [project, setProject] = useState<Project | null>(null);
+  const [newUpdate, setNewUpdate] = useState('');
+
+  useEffect(() => {
+    if (!id) return;
+    // Prefer persisted project from localStorage, fall back to mock data
+    const stored = getStoredProject(id);
+    if (stored) {
+      setProject(stored);
+    } else {
+      const fromMock = mockProjects.find((p) => p.id === id) ?? null;
+      setProject(fromMock ? { ...fromMock } : null);
+    }
+  }, [id]);
 
   if (!project) {
     return (
@@ -46,6 +64,34 @@ const ProjectDetailPage = () => {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
+  function toggleMilestone(mid: string) {
+    if (!project) return;
+    const updated = { ...project } as Project;
+    updated.milestones = updated.milestones.map((m) => (m.id === mid ? { ...m, completed: !m.completed } : m));
+    const completedCount = updated.milestones.filter((m) => m.completed).length;
+    updated.progress = Math.round((completedCount / updated.milestones.length) * 100);
+    if (completedCount === updated.milestones.length) updated.status = 'completed';
+    else if (updated.status === 'completed') updated.status = 'ongoing';
+    // persist
+    persistProject(updated);
+    setProject(updated);
+  }
+
+  function handleMarkCompleted() {
+    if (!project) return;
+    persistMarkCompleted(project.id);
+    const updated = { ...project, status: 'completed', progress: 100 } as Project;
+    setProject(updated);
+  }
+
+  function handleAddUpdate() {
+    if (!project || !newUpdate.trim()) return;
+    const update = { id: 'u' + Date.now(), date: new Date().toISOString(), description: newUpdate.trim(), type: 'progress' } as any;
+    persistAddUpdate(project.id, update);
+    setProject({ ...project, updates: [update, ...(project.updates ?? [])] });
+    setNewUpdate('');
+  }
+
   return (
     <>
       <Helmet>
@@ -73,6 +119,13 @@ const ProjectDetailPage = () => {
               </span>
               <h2 className="text-3xl font-bold leading-tight text-gray-900">{project.title}</h2>
               <p className="text-gray-600 mt-3">{project.description}</p>
+
+              {isAdminView && (
+                <div className="mt-4 flex items-center gap-3">
+                  <button onClick={handleMarkCompleted} className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Mark Completed</button>
+                </div>
+              )}
+
             </div>
           </div>
 
@@ -149,10 +202,20 @@ const ProjectDetailPage = () => {
                         : 'bg-gray-50 border-gray-200'
                     }`}
                   >
-                    {milestone.completed ? (
-                      <CheckCircle className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                    {isAdminView ? (
+                      <button onClick={() => toggleMilestone(milestone.id)} className="mt-1">
+                        {milestone.completed ? (
+                          <CheckCircle className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                        ) : (
+                          <Circle className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
+                        )}
+                      </button>
                     ) : (
-                      <Circle className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
+                      milestone.completed ? (
+                        <CheckCircle className="w-6 h-6 text-green-600 shrink-0 mt-1" />
+                      ) : (
+                        <Circle className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
+                      )
                     )}
                     <div className="flex-1">
                       <p className={`font-semibold text-base leading-tight ${milestone.completed ? 'text-green-700' : 'text-gray-900'}`}>
@@ -164,6 +227,17 @@ const ProjectDetailPage = () => {
                 ))}
               </div>
             </div>
+
+            {/* Admin update composer */}
+            {isAdminView && (
+              <div className="mb-6">
+                <h3 className="font-bold mb-3 text-lg">Post an update</h3>
+                <textarea className="w-full p-3 border rounded" placeholder="Write an update..." value={newUpdate} onChange={(e)=>setNewUpdate(e.target.value)} />
+                <div className="flex justify-end mt-2">
+                  <button onClick={handleAddUpdate} className="px-4 py-2 bg-primary text-white rounded">Post</button>
+                </div>
+              </div>
+            )}
 
             {/* Updates */}
             {project.updates?.length > 0 && (

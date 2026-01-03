@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { projects as mockProjects } from "@/data/mockData";
+import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import {
   Users,
   FolderKanban,
@@ -121,7 +123,31 @@ const locations = [
   "Lalitpur",
 ];
 
-const AdminPanel = () => {
+const SearchBar = ({ searchQuery, onSearchChange, selectedLocation, onLocationChange }: any) => {
+  return (
+    <div className="flex gap-4 mb-6">
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => onSearchChange(e.target.value)}
+        placeholder="Search projects..."
+        className="w-full pl-4 pr-4 py-2.5 bg-secondary border border-input rounded-lg"
+      />
+      <select
+        value={selectedLocation}
+        onChange={(e) => onLocationChange(e.target.value)}
+        className="px-4 py-2 bg-background border border-input rounded-lg"
+      >
+        <option>All Locations</option>
+        {locations.map((loc) => (
+          <option key={loc}>{loc}</option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+const AdminPanel = () => { 
   const [activeTab, setActiveTab] = useState("projects");
   const [projects, setProjects] = useState(initialProjects);
   const [users, setUsers] = useState(initialUsers);
@@ -295,7 +321,7 @@ const AdminPanel = () => {
     );
   };
 
-  const filteredProjects = projects.filter(
+  const filteredStateProjects = projects.filter(
     (p) =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -308,6 +334,21 @@ const AdminPanel = () => {
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Local project search/filter state (used only in Projects tab)
+  const navigate = useNavigate();
+  const [projectSearchQuery, setProjectSearchQuery] = useState("");
+  const [selectedLocationFilter, setSelectedLocationFilter] = useState("All Locations");
+
+  const filteredProjects = mockProjects.filter((project) => {
+    const matchesSearch = project.title
+      .toLowerCase()
+      .includes(projectSearchQuery.toLowerCase());
+    const matchesLocation =
+      selectedLocationFilter === "All Locations" ||
+      project.location.toLowerCase().includes(selectedLocationFilter.toLowerCase());
+    return matchesSearch && matchesLocation;
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-NP", {
@@ -418,128 +459,40 @@ const AdminPanel = () => {
           {/* Projects Tab */}
           {activeTab === "projects" && (
             <div className="space-y-4">
-              {filteredProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="civic-card hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-foreground mb-2">
-                        <Link to={`/admin/projects/${project.id}`} className="hover:underline">
-                          {project.title}
-                        </Link>
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {project.description}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span
-                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            project.status
-                          )}`}
-                        >
-                          {getStatusIcon(project.status)}
-                          {project.status.charAt(0).toUpperCase() +
-                            project.status.slice(1)}
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                          {project.category}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={() => handleEditProject(project)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit Project"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                        title="Delete Project"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+              <div className="max-w-4xl mx-auto p-6">
+                {/* Header */}
+                <header className="mb-8">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Civic Projects</h3>
+                  <p className="text-muted-foreground">Track government infrastructure projects in your area</p>
+                </header>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-foreground">
-                        {project.location}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-foreground">
-                        {formatCurrency(project.budget)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-foreground">
-                        {project.startDate}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-foreground">
-                        {project.contractor}
-                      </span>
-                    </div>
-                  </div>
+                {/* Search & Filter (local to projects) */}
+                <SearchBar
+                  searchQuery={projectSearchQuery}
+                  onSearchChange={setProjectSearchQuery}
+                  selectedLocation={selectedLocationFilter}
+                  onLocationChange={setSelectedLocationFilter}
+                />
 
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-semibold text-foreground">
-                        {project.progress}%
-                      </span>
-                    </div>
-                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-500"
-                        style={{ width: `${project.progress}%` }}
-                      />
-                    </div>
-                  </div>
+                {/* Projects List */}
+                <div className="space-y-4">
+                  {filteredProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={() => navigate(`/admin/projects/${project.id}/view`)}
+                    />
+                  ))}
 
-                  <div className="flex gap-2 pt-4 border-t border-border">
-                    <button
-                      onClick={() => handleStatusChange(project.id, "ongoing")}
-                      className="flex-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                    >
-                      Set Ongoing
-                    </button>
-                    <button
-                      onClick={() => handleStatusChange(project.id, "halted")}
-                      className="flex-1 px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
-                    >
-                      Halt
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleStatusChange(project.id, "completed")
-                      }
-                      className="flex-1 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
-                    >
-                      Complete
-                    </button>
-                  </div>
+                  {filteredProjects.length === 0 && (
+                    <div className="text-center py-12 text-muted-foreground">
+                      No projects found matching your criteria.
+                    </div>
+                  )}
                 </div>
-              ))}
-              {filteredProjects.length === 0 && (
-                <div className="text-center py-12 civic-card">
-                  <FolderKanban className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">No projects found</p>
-                </div>
-              )}
+              </div>
             </div>
-          )}
+          )} 
 
           {/* Users Tab */}
           {activeTab === "users" && (
@@ -585,7 +538,7 @@ const AdminPanel = () => {
                           <span
                             className={`px-2 py-1 text-xs font-medium rounded-full ${
                               user.role === "Admin"
-                                ? "bg-red-100 text-red-700"
+                                ? "bg-tohers-100 text-tohers-700"
                                 : user.role === "Moderator"
                                 ? "bg-blue-100 text-blue-700"
                                 : "bg-gray-100 text-gray-700"
